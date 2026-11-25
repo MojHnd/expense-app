@@ -1,0 +1,15 @@
+{
+  "name": "expense-app",
+  "private": true,
+  "type": "module",
+  "description": "Personal expense tracker PWA (no build step, no runtime dependencies)",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "e2e": "playwright test",
+    "serve": "python3 -m http.server 8080",
+    "import-history": "node tools/import-history.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1"
+  }
+}

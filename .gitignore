@@ -1,0 +1,11 @@
+# Private data: never commit
+handoff-*.md
+history-files/
+private/
+*.history.json
+
+# Tooling
+node_modules/
+test-results/
+playwright-report/
+.claude/settings.local.json
