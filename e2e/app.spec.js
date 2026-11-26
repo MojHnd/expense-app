@@ -164,6 +164,26 @@ test('history shows the chart and the month list; a row opens the month', async 
   await expect(page).toHaveURL(new RegExp(`#/month/${PREV}$`));
 });
 
+test('history filters the chart and the year list by one part', async ({ page }, testInfo) => {
+  await open(page, '#/history');
+  await page.getByRole('group', { name: 'Part' }).getByRole('button', { name: 'Grocery' }).click();
+  await expect(page.locator('.chart .seg')).toHaveCount(1);
+  await expect(page.locator('.chart .seg')).toHaveAttribute('fill', 'var(--series-2)');
+  await expect(page.locator('.legend')).toHaveCount(0);
+  const year = page.locator(`[data-year="${PREV.slice(0, 4)}"]`);
+  await expect(year.locator('.subtotal')).toHaveText('$120');
+  await expect(year.getByRole('link')).toContainText('$120');
+  await expect(year.getByRole('link')).toContainText('Total $1,265');
+  const column = page.locator('.chart .hit').first();
+  if (testInfo.project.name === 'iphone') await column.tap();
+  else await column.hover();
+  await expect(page.locator('.tooltip')).toContainText('Grocery');
+  await expect(page.locator('.tooltip')).not.toContainText('Fixed');
+  await page.getByRole('group', { name: 'Part' }).getByRole('button', { name: 'All' }).click();
+  await expect(year.locator('.subtotal')).toHaveText('$1,265');
+  await expect(page.locator('.legend')).toContainText('Grocery');
+});
+
 test('trends shows the top names and the detail per year', async ({ page }) => {
   await open(page, '#/trends');
   await page.getByRole('combobox', { name: 'Period' }).selectOption('all');
