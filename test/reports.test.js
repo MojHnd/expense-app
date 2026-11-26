@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createDoc, createMonth, addItem, addTemplateItem } from '../src/model.js';
 import {
-  monthSummaries, yearsOf, yearSummary, topOtherNames, nameTotalsByYear, yearVsYear, nameKey,
+  monthSummaries, yearsOf, yearSummary, topOtherNames, nameTotalsByYear, yearVsYear, nameKey, targetStatus,
 } from '../src/reports.js';
 import { suggestNames } from '../src/names.js';
 
@@ -97,4 +97,11 @@ test('yearVsYear with upTo leaves out later months', () => {
   const cmp = yearVsYear(doc, 2025, 2026, { upTo: '2026-11' });
   assert.equal(cmp.months[11].b, null);
   assert.deepEqual(cmp.total, { a: 135000, b: 513500 });
+});
+
+test('targetStatus says if a month is over or under its target', () => {
+  assert.equal(targetStatus({ total: 650001, target: 650000 }), 'over');
+  assert.equal(targetStatus({ total: 650000, target: 650000 }), 'under');
+  assert.equal(targetStatus({ total: 100, target: 650000 }), 'under');
+  assert.equal(targetStatus({ total: 100, target: null }), null);
 });

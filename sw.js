@@ -3,7 +3,7 @@
 // then caches all files again, and the page reloads (see app.js).
 // Requests to other origins (the GitHub API) are not touched.
 
-const CACHE = 'expenses-v4';
+const CACHE = 'expenses-v5';
 const SHELL = [
   './', 'index.html', 'styles.css', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',

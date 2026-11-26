@@ -4,6 +4,9 @@
 
 export const KINDS = ['fixed', 'grocery', 'gas', 'other'];
 
+/** The monthly target when the settings have no default target ($6,500). */
+export const DEFAULT_TARGET = 650000;
+
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
   'August', 'September', 'October', 'November', 'December'];
 
@@ -97,6 +100,28 @@ export function setDefaultTarget(doc, target, options = {}) {
   const { now } = { ...defaults(), ...options };
   doc.settings.defaultTarget = target;
   doc.settings.updatedAt = now;
+}
+
+/**
+ * Give the default target to each month that has no target (and $6,500 to the settings if they have none).
+ * The new `updatedAt` is the old one + 1: two devices that fill the same month make the same record,
+ * and a real change that the user makes later still wins in the merge. Returns true if something changed.
+ */
+export function fillMissingTargets(doc) {
+  let changed = false;
+  if (doc.settings.defaultTarget == null) {
+    doc.settings.defaultTarget = DEFAULT_TARGET;
+    doc.settings.updatedAt += 1;
+    changed = true;
+  }
+  for (const key of liveMonthKeys(doc)) {
+    const month = doc.months[key];
+    if (month.target != null) continue;
+    month.target = doc.settings.defaultTarget;
+    month.updatedAt += 1;
+    changed = true;
+  }
+  return changed;
 }
 
 // ---- Items ----

@@ -100,8 +100,9 @@ function createCard(ctx, key) {
 function hero(ctx, key, month, totals) {
   const target = month.target;
   const editTarget = async () => {
-    const value = await amountSheet({ title: `Target for ${monthLabel(key)}`, message: 'Leave empty for no target. The default for new months is in Settings.', value: target, allowEmpty: true });
-    if (value !== undefined) ctx.mutate((doc) => setMonthTarget(doc, key, value));
+    const fallback = ctx.doc.settings.defaultTarget;
+    const value = await amountSheet({ title: `Target for ${monthLabel(key)}`, message: `Leave empty to use the default target (${formatMoney(fallback)}). You can change the default in Settings.`, value: target, allowEmpty: true });
+    if (value !== undefined) ctx.mutate((doc) => setMonthTarget(doc, key, value ?? doc.settings.defaultTarget));
   };
   let targetPart;
   if (target) {

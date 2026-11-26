@@ -6,7 +6,7 @@ import {
   addItem, updateItem, deleteItem, liveItems, monthTotals,
   setDefaultTarget, setMonthTarget,
   liveTemplate, addTemplateItem, updateTemplateItem, deleteTemplateItem,
-  openMonthKeys, applyTemplateChange, startMonthKey,
+  openMonthKeys, applyTemplateChange, startMonthKey, fillMissingTargets,
 } from '../src/model.js';
 
 let counter = 0;
@@ -127,6 +127,28 @@ test('startMonthKey gives the last month that exists, or the current month when 
   assert.equal(startMonthKey(doc, '2026-11'), '2026-12');
   deleteMonth(doc, '2026-12', opts());
   assert.equal(startMonthKey(doc, '2026-11'), '2026-10');
+});
+
+test('fillMissingTargets gives the default target to each month that has none', () => {
+  const doc = docWithTemplate();
+  for (const key of ['2026-10', '2026-11']) createMonth(doc, key, opts(2000));
+  setMonthTarget(doc, '2026-11', 500000, opts(3000));
+  assert.equal(fillMissingTargets(doc), true);
+  assert.equal(doc.settings.defaultTarget, 650000);
+  assert.equal(getMonth(doc, '2026-10').target, 650000);
+  assert.equal(getMonth(doc, '2026-11').target, 500000);
+  // The time goes up by 1 only, so two devices make the same record and a later real change still wins.
+  assert.equal(getMonth(doc, '2026-10').updatedAt, 2001);
+  assert.equal(getMonth(doc, '2026-11').updatedAt, 3000);
+  assert.equal(fillMissingTargets(doc), false);
+});
+
+test('fillMissingTargets uses the default target from the settings', () => {
+  const doc = docWithTemplate();
+  createMonth(doc, '2026-10', opts());
+  setDefaultTarget(doc, 700000, opts());
+  fillMissingTargets(doc);
+  assert.equal(getMonth(doc, '2026-10').target, 700000);
 });
 
 test('template update can apply to open months only', () => {

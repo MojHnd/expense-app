@@ -11,7 +11,7 @@ import { mergeDocs } from '../merge.js';
 import { serialize } from '../sync.js';
 import { lockSupported } from '../lock.js';
 
-export const APP_VERSION = '1.2.0';
+export const APP_VERSION = '1.3.0';
 
 function listOfMonths(keys) {
   const labels = keys.map((k) => monthLabel(k));
@@ -196,7 +196,7 @@ export function settingsView(ctx) {
           h('li', null, h('button', {
             class: 'item', type: 'button',
             onclick: async () => {
-              const v = await amountSheet({ title: 'Default monthly target', message: 'New months copy this target. Leave empty for no target.', value: target, allowEmpty: true });
+              const v = await amountSheet({ title: 'Default monthly target', message: 'New months copy this target. Months that have no target also get it.', value: target });
               if (v !== undefined) { ctx.mutate((doc) => setDefaultTarget(doc, v)); ctx.toast('Default target saved'); }
             },
           }, h('span', { class: 'main' }, h('span', { class: 'name' }, 'Default monthly target'), h('span', { class: 'meta' }, 'New months copy it')),

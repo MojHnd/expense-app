@@ -269,6 +269,9 @@ dialog.sheet::backdrop { background: rgba(0,0,0,.4); }
 .chart .hit { fill: transparent; cursor: pointer; }
 .chart .col:hover .seg, .chart .col.active .seg { filter: brightness(1.12); }
 .chart .target { stroke: var(--ink-2); stroke-width: 1; stroke-dasharray: none; opacity: .6; }
+.chart .target-mark { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+.chart .col.dim .seg { opacity: .25; }
+.chart .col.dim .target-mark { opacity: .35; }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--ink-2); margin-top: 8px; }
 .tooltip {
   position: absolute; z-index: 3; pointer-events: none;

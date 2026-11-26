@@ -6,7 +6,7 @@ import { historyView } from './ui/history.js';
 import { trendsView } from './ui/trends.js';
 import { settingsView, templateView, syncStatusLine } from './ui/settings.js';
 import { loadDoc, saveDoc, loadDevice, saveDevice } from './store.js';
-import { monthKeyOf, startMonthKey } from './model.js';
+import { monthKeyOf, startMonthKey, fillMissingTargets } from './model.js';
 import { mergeDocs, canonicalJson } from './merge.js';
 import { syncOnce } from './sync.js';
 import { lockSupported, registerPasskey, verifyPasskey, shouldRelock } from './lock.js';
@@ -26,6 +26,8 @@ const state = {
 };
 
 function persist() {
+  // Each month must have a target. Months from an import, a sync or an old version can have none.
+  if (fillMissingTargets(state.doc)) scheduleSync();
   saveDoc(storage, state.doc);
 }
 
@@ -246,6 +248,8 @@ document.addEventListener('visibilitychange', () => {
   }
   state.hiddenAt = null;
 });
+
+persist(); // gives a target to the months that have none
 
 if (lockActive()) {
   lockNow();

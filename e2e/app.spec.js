@@ -156,6 +156,22 @@ test('the month target shows the amount left', async ({ page }) => {
   await expect(page.getByRole('button', { name: /Target/ })).toContainText('$265 over');
 });
 
+test('a month without a target gets the default target, and an empty target goes back to it', async ({ page }) => {
+  const doc = seedDoc();
+  doc.months[PREV].target = null;
+  await open(page, `#/month/${PREV}`, doc);
+  const target = page.getByRole('button', { name: /Target/ });
+  await expect(target).toContainText('$2,000');
+  await target.click();
+  await sheet(page).getByRole('textbox').fill('1000');
+  await sheet(page).getByRole('button', { name: 'Save' }).click();
+  await expect(target).toContainText('$1,000');
+  await target.click();
+  await sheet(page).getByRole('textbox').fill('');
+  await sheet(page).getByRole('button', { name: 'Save' }).click();
+  await expect(target).toContainText('$2,000');
+});
+
 test('the app opens on the last month that exists, and the Month tab goes there too', async ({ page }) => {
   const doc = seedDoc();
   doc.months[NEXT] = { ...doc.months[PREV], items: [] };
@@ -192,6 +208,31 @@ test('history filters the chart and the year list by one part', async ({ page },
   await page.getByRole('group', { name: 'Part' }).getByRole('button', { name: 'All' }).click();
   await expect(year.locator('.subtotal')).toHaveText('$1,265');
   await expect(page.locator('.legend')).toContainText('Grocery');
+});
+
+test('history filters the months by over and under target', async ({ page }) => {
+  const doc = seedDoc();
+  doc.months[shift(THIS, -2)] = {
+    target: 100000, createdAt: 1, updatedAt: 1, deleted: false,
+    items: [
+      { id: 'o-f1', kind: 'fixed', name: 'Rent', amount: 100000, updatedAt: 1 },
+      { id: 'o-g1', kind: 'grocery', name: '', amount: 5000, updatedAt: 1 },
+    ],
+  };
+  await open(page, '#/history', doc);
+  const filter = page.getByRole('group', { name: 'Target' });
+  const rows = page.locator('[data-year] .item');
+  await expect(rows).toHaveCount(2);
+  await filter.getByRole('button', { name: 'Over target' }).click();
+  await expect(rows).toHaveCount(1);
+  await expect(rows).toContainText('$50 over');
+  await expect(page.locator('.chart .col.dim')).toHaveCount(1);
+  await filter.getByRole('button', { name: 'Under target' }).click();
+  await expect(rows).toHaveCount(1);
+  await expect(rows).toContainText('$735 under');
+  await filter.getByRole('button', { name: 'Any' }).click();
+  await expect(rows).toHaveCount(2);
+  await expect(page.locator('.chart .col.dim')).toHaveCount(0);
 });
 
 test('trends shows the top names and the detail per year', async ({ page }) => {

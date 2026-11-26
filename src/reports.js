@@ -16,6 +16,12 @@ export function monthSummaries(doc) {
   });
 }
 
+/** 'over' when the month total is more than its target, 'under' when it is not, null when there is no target. */
+export function targetStatus(row) {
+  if (!row.target) return null;
+  return row.total > row.target ? 'over' : 'under';
+}
+
 export function yearsOf(doc) {
   return [...new Set(liveMonthKeys(doc).map((k) => Number(k.slice(0, 4))))];
 }

@@ -34,9 +34,9 @@ function columnPath(x, y, w, hgt, r) {
 }
 
 /**
- * groups: [{ key, tick (axis label or ''), title, bars: [[{ series, value }]] }]
+ * groups: [{ key, tick (axis label or ''), title, bars: [[{ series, value }]], target (optional mark), dim (fade it) }]
  * series: [{ id, label, color }]  (color is a CSS value such as "var(--series-1)")
- * options: { height, onSelect(key), rows(group) → [{ label, value, color }], total(group) }
+ * options: { height, onSelect(key), rows(group) → [{ label, value, color }], total(group), note(group) → text }
  */
 export function columnChart(groups, series, options = {}) {
   const H = options.height || 220;
@@ -44,7 +44,7 @@ export function columnChart(groups, series, options = {}) {
   const plotH = H - PAD.top - PAD.bottom;
   const colorOf = Object.fromEntries(series.map((x) => [x.id, x.color]));
   const barTotals = groups.flatMap((g) => g.bars.map((bar) => bar.reduce((sum, seg) => sum + seg.value, 0)));
-  const ticks = niceTicks(Math.max(0, ...barTotals, options.target || 0));
+  const ticks = niceTicks(Math.max(0, ...barTotals, ...groups.map((g) => g.target || 0), options.target || 0));
   const max = ticks.at(-1) || 1;
   const y = (v) => PAD.top + plotH - (v / max) * plotH;
 
@@ -77,6 +77,7 @@ export function columnChart(groups, series, options = {}) {
         h('strong', null, r.value === null ? '—' : formatMoney(r.value)),
         h('span', { class: 'muted' }, r.label))),
       options.total ? h('div', { class: 't-row' }, h('span', { class: 't-key' }), h('strong', null, formatMoney(options.total(g))), h('span', null, 'Total')) : null,
+      options.note?.(g) ? h('div', { class: 'small' }, options.note(g)) : null,
       options.onSelect ? h('div', { class: 'small muted' }, 'Tap again to open') : null,
     );
     tip.hidden = false;
@@ -94,7 +95,7 @@ export function columnChart(groups, series, options = {}) {
 
   groups.forEach((g, gi) => {
     const x0 = PAD.left + gi * band + (band - (barW * barsPer + innerGap * (barsPer - 1))) / 2;
-    const col = s('g', { class: 'col' });
+    const col = s('g', { class: g.dim ? 'col dim' : 'col' });
     g.bars.forEach((bar, bi) => {
       const x = x0 + bi * (barW + innerGap);
       let acc = 0;
@@ -114,6 +115,10 @@ export function columnChart(groups, series, options = {}) {
         acc += seg.value;
       });
     });
+    if (g.target) {
+      const w = barW * barsPer + innerGap * (barsPer - 1);
+      col.append(s('line', { class: 'target-mark', x1: x0 - 2, x2: x0 + w + 2, y1: y(g.target), y2: y(g.target) }));
+    }
     const hit = s('rect', { class: 'hit', x: PAD.left + gi * band, y: PAD.top, width: band, height: plotH + PAD.bottom, tabindex: 0, role: 'button', 'aria-label': g.title });
     const xCenter = PAD.left + gi * band + band / 2;
     hit.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') show(g, col, xCenter); });
