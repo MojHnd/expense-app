@@ -6,7 +6,7 @@ import { historyView } from './ui/history.js';
 import { trendsView } from './ui/trends.js';
 import { settingsView, templateView, syncStatusLine } from './ui/settings.js';
 import { loadDoc, saveDoc, loadDevice, saveDevice } from './store.js';
-import { monthKeyOf } from './model.js';
+import { monthKeyOf, startMonthKey } from './model.js';
 import { mergeDocs, canonicalJson } from './merge.js';
 import { syncOnce } from './sync.js';
 import { lockSupported, registerPasskey, verifyPasskey, shouldRelock } from './lock.js';
@@ -78,7 +78,7 @@ function render() {
   if (state.locked) return;
   const r = route();
   if (!r) {
-    location.replace(`#/month/${ctx.todayKey}`);
+    location.replace(`#/month/${startMonthKey(state.doc, ctx.todayKey)}`);
     return;
   }
   const sameRoute = state.lastRoute === location.hash;
@@ -97,7 +97,7 @@ function render() {
   for (const a of $('tabbar').querySelectorAll('a')) {
     if (a.dataset.tab === r.tab) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
-    if (a.dataset.tab === 'month') a.href = `#/month/${ctx.todayKey}`;
+    if (a.dataset.tab === 'month') a.href = `#/month/${startMonthKey(state.doc, ctx.todayKey)}`;
   }
   $('tabbar').hidden = false;
   if (sameRoute) window.scrollTo(0, scrollY);

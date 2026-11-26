@@ -6,7 +6,7 @@ import {
   addItem, updateItem, deleteItem, liveItems, monthTotals,
   setDefaultTarget, setMonthTarget,
   liveTemplate, addTemplateItem, updateTemplateItem, deleteTemplateItem,
-  openMonthKeys, applyTemplateChange,
+  openMonthKeys, applyTemplateChange, startMonthKey,
 } from '../src/model.js';
 
 let counter = 0;
@@ -118,6 +118,15 @@ test('openMonthKeys gives the current and future months that exist', () => {
   const doc = docWithTemplate();
   for (const key of ['2026-10', '2026-11', '2026-12']) createMonth(doc, key, opts());
   assert.deepEqual(openMonthKeys(doc, '2026-11'), ['2026-11', '2026-12']);
+});
+
+test('startMonthKey gives the last month that exists, or the current month when there is none', () => {
+  const doc = docWithTemplate();
+  assert.equal(startMonthKey(doc, '2026-11'), '2026-11');
+  for (const key of ['2026-10', '2026-12']) createMonth(doc, key, opts());
+  assert.equal(startMonthKey(doc, '2026-11'), '2026-12');
+  deleteMonth(doc, '2026-12', opts());
+  assert.equal(startMonthKey(doc, '2026-11'), '2026-10');
 });
 
 test('template update can apply to open months only', () => {

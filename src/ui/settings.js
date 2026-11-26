@@ -11,7 +11,7 @@ import { mergeDocs } from '../merge.js';
 import { serialize } from '../sync.js';
 import { lockSupported } from '../lock.js';
 
-export const APP_VERSION = '1.1.0';
+export const APP_VERSION = '1.2.0';
 
 function listOfMonths(keys) {
   const labels = keys.map((k) => monthLabel(k));

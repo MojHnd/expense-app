@@ -156,6 +156,16 @@ test('the month target shows the amount left', async ({ page }) => {
   await expect(page.getByRole('button', { name: /Target/ })).toContainText('$265 over');
 });
 
+test('the app opens on the last month that exists, and the Month tab goes there too', async ({ page }) => {
+  const doc = seedDoc();
+  doc.months[NEXT] = { ...doc.months[PREV], items: [] };
+  await open(page, '', doc);
+  await expect(page).toHaveURL(new RegExp(`#/month/${NEXT}$`));
+  await page.getByRole('link', { name: 'History' }).click();
+  await page.getByRole('link', { name: 'Month' }).click();
+  await expect(page).toHaveURL(new RegExp(`#/month/${NEXT}$`));
+});
+
 test('history shows the chart and the month list; a row opens the month', async ({ page }) => {
   await open(page, '#/history');
   await expect(page.locator('.chart svg')).toBeVisible();

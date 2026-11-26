@@ -42,6 +42,11 @@ export function liveMonthKeys(doc) {
   return Object.keys(doc.months).filter((k) => !doc.months[k].deleted).sort();
 }
 
+/** The month the app opens on: the last month that exists, or the current month when there is none. */
+export function startMonthKey(doc, todayKey) {
+  return liveMonthKeys(doc).at(-1) || todayKey;
+}
+
 function requireMonth(doc, key) {
   const month = getMonth(doc, key);
   if (!month) throw new Error(`No month ${key}`);
